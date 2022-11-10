@@ -141,10 +141,14 @@ ImageReader::Status ImageReader::Next(Camera* camera, Image* image,
     const std::string mask_path =
         JoinPaths(options_.mask_path,
                   GetRelativePath(options_.image_path, image_path) + ".png");
-    if (ExistsFile(mask_path) && !mask->Read(mask_path, false)) {
+    if (!ExistsFile(mask_path)) {
+        std::cerr << "mask_path: " << mask_path << " not exist!" << std::endl;
+      return Status::MASK_ERROR;
+    } else if (ExistsFile(mask_path) && !mask->Read(mask_path, false)) {
       // NOTE: Maybe introduce a separate error type MASK_ERROR?
-      return Status::BITMAP_ERROR;
+      return Status::MASK_ERROR;
     }
+    std::cerr << "Successfully read mask: " << mask_path << std::endl;
   }
 
   //////////////////////////////////////////////////////////////////////////////

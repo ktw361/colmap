@@ -456,6 +456,8 @@ void FeatureWriterThread::Run() {
                   << std::endl;
       } else if (image_data.status == ImageReader::Status::BITMAP_ERROR) {
         std::cout << "  ERROR: Failed to read image file format." << std::endl;
+      } else if (image_data.status == ImageReader::Status::MASK_ERROR) {
+        std::cout << "  ERROR: Failed to read mask file." << std::endl;
       } else if (image_data.status ==
                  ImageReader::Status::CAMERA_SINGLE_DIM_ERROR) {
         std::cout << "  ERROR: Single camera specified, "
