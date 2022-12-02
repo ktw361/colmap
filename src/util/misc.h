@@ -36,6 +36,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <boost/filesystem.hpp>
 
