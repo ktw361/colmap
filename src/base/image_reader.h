@@ -56,6 +56,13 @@ struct ImageReaderOptions {
   // grayscale).
   std::string mask_path = "";
 
+  // Optional path to a txt file, where each line contains
+  //    <image_name> <mask_absolute_path>
+  // if <mask_absolute_path> is empty, 
+  //    then no mapping will be used for that image.
+  // This option will disable to 'mask_path' option.
+  std::string mask_mapping_path = "";
+
   // Optional list of images to read. The list must contain the relative path
   // of the images with respect to the image_path.
   std::vector<std::string> image_list;
@@ -127,6 +134,8 @@ class ImageReader {
   // Names of image sub-folders.
   std::string prev_image_folder_;
   std::unordered_set<std::string> image_folders_;
+  // Mapping from image_name to mask_path
+  std::unordered_map<std::string, std::string> mask_mapping_;
 };
 
 }  // namespace colmap

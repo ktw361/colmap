@@ -324,6 +324,31 @@ std::vector<std::string> ReadTextFileLines(const std::string& path) {
   return lines;
 }
 
+std::unordered_map<
+    std::string, std::string> ReadTextFileMappingLines(
+            const std::string& path) {
+  std::ifstream file(path);
+
+  std::string line;
+  std::unordered_map<std::string, std::string> mapping;
+  std::vector<std::string> entry_line;
+  while (std::getline(file, line)) {
+    StringTrim(&line);
+
+    if (line.empty()) {
+      continue;
+    }
+
+    entry_line = StringSplit(line, " ");
+    if (entry_line.size() < 2) {
+        continue;
+    }
+    mapping[entry_line[0]] = entry_line[1];
+  }
+
+  return mapping;
+}
+
 void RemoveCommandLineArgument(const std::string& arg, int* argc, char** argv) {
   for (int i = 0; i < *argc; ++i) {
     if (argv[i] == arg) {

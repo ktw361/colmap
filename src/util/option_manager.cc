@@ -234,6 +234,8 @@ void OptionManager::AddExtractionOptions() {
 
   AddAndRegisterDefaultOption("ImageReader.mask_path",
                               &image_reader->mask_path);
+  AddAndRegisterDefaultOption("ImageReader.mask_mapping_path",
+                              &image_reader->mask_mapping_path);
   AddAndRegisterDefaultOption("ImageReader.camera_model",
                               &image_reader->camera_model);
   AddAndRegisterDefaultOption("ImageReader.single_camera",

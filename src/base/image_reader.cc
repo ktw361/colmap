@@ -44,6 +44,9 @@ bool ImageReaderOptions::Check() const {
     CHECK_OPTION(
         CameraModelVerifyParams(model_id, CSVToVector<double>(camera_params)));
   }
+  if (!mask_mapping_path.empty()) {
+    CHECK_OPTION(ExistsFile(mask_mapping_path));
+  }
   return true;
 }
 
@@ -67,6 +70,11 @@ ImageReader::ImageReader(const ImageReaderOptions& options, Database* database)
     for (auto& image_name : options_.image_list) {
       image_name = JoinPaths(options_.image_path, image_name);
     }
+  }
+  
+  // Get image_name to mask_path mapping, if exists
+  if (!options_.mask_mapping_path.empty()) {
+    mask_mapping_ = ReadTextFileMappingLines(options_.mask_mapping_path);
   }
 
   if (static_cast<camera_t>(options_.existing_camera_id) != kInvalidCameraId) {
@@ -137,12 +145,28 @@ ImageReader::Status ImageReader::Next(Camera* camera, Image* image,
   // Read mask.
   //////////////////////////////////////////////////////////////////////////////
 
-  if (mask && !options_.mask_path.empty()) {
-    const std::string mask_path =
-        JoinPaths(options_.mask_path,
-                  GetRelativePath(options_.image_path, image_path) + ".png");
-    if (!ExistsFile(mask_path)) {
+  if (mask && !mask_mapping_.empty()) {
+    std::string image_relative_path = 
+      GetRelativePath(options_.image_path, image_path);
+    if (mask_mapping_.count(image_relative_path) > 0) {
+      const std::string mask_path = mask_mapping_[image_relative_path];
+
+      if (!ExistsFile(mask_path)) {
         std::cerr << "mask_path: " << mask_path << " not exist!" << std::endl;
+        return Status::MASK_ERROR;
+      } else if (ExistsFile(mask_path) && !mask->Read(mask_path, false)) {
+        // NOTE: Maybe introduce a separate error type MASK_ERROR?
+        return Status::MASK_ERROR;
+      }
+      std::cerr << "Successfully read mask: " << mask_path << std::endl;
+    }
+  } else if (mask && !options_.mask_path.empty()) {
+    const std::string mask_path =
+      JoinPaths(options_.mask_path, 
+          GetRelativePath(options_.image_path, image_path) + ".png");
+
+    if (!ExistsFile(mask_path)) {
+      std::cerr << "mask_path: " << mask_path << " not exist!" << std::endl;
       return Status::MASK_ERROR;
     } else if (ExistsFile(mask_path) && !mask->Read(mask_path, false)) {
       // NOTE: Maybe introduce a separate error type MASK_ERROR?
